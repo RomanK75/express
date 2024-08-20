@@ -6,7 +6,6 @@
   "main": "app.js",
   "scripts": {
     "prettier": "prettier --write .",
-    "format": "npm run prettier && npm run lint",
     "start:dev": "nodemon app.js",
     "start": "node app.js",
     "test": "jest",
