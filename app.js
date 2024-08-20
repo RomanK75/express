@@ -4,7 +4,7 @@ import router from './routes/user.js';
 const app = express();
 
 app.use(express.json());
-app.use('/api', router);
+app.use('/user', router);
 
 const port = 3000;
 app.listen(port, () => {
