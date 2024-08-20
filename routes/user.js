@@ -1,8 +1,5 @@
-// user.js
 import express from 'express';
 import User from '../models/userModel.js';
-import Document from '../models/document.js';
-import Work from '../models/work.js';
 import generateKey from '../utils/keyGen.js';
 import db from '../db/db.js';
 import bcrypt from 'bcrypt';
