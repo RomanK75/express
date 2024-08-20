@@ -11,6 +11,7 @@ const router = express.Router();
 
 router.post('/register', (req, res) => {
   const { name, birthdate, phone, document, work, password } = req.body;
+
   db.get('SELECT * FROM users WHERE name = ?', [name], (err, row) => {
     if (err) {
       console.error(err);
@@ -18,33 +19,20 @@ router.post('/register', (req, res) => {
     } else if (row) {
       res.status(400).send('Пользователь уже зарегистрирован');
     } else {
+      const authKey = generateKey();
       const hashed_password = bcrypt.hashSync(password, 10);
-      const newUser = new User(
-        null,
-        name,
-        birthdate,
-        phone,
-        new Document(document.series, document.number, document.issueDate),
-        new Work(work.firmName, work.phone, work.address),
-        generateKey(),
-        hashed_password,
-      );
+
+      // Вставляем данные в таблицу users
       db.run(
         `
-        INSERT INTO users (name, birthdate, phone, document_series, document_number, document_issue_date, work_firm_name, work_phone, work_address, auth_key, hashed_password)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-      `,
+          INSERT INTO users (name, birthdate, phone, auth_key, hashed_password)
+          VALUES (?, ?, ?, ?, ?);
+        `,
         [
           name,
           birthdate,
           phone,
-          document.series,
-          document.number,
-          document.issueDate,
-          work.firmName,
-          work.phone,
-          work.address,
-          newUser.authKey,
+          authKey,
           hashed_password,
         ],
         err => {
@@ -52,7 +40,67 @@ router.post('/register', (req, res) => {
             console.error(err);
             res.status(500).send('Ошибка базы данных');
           } else {
-            res.send(newUser);
+            // Получаем идентификатор только что добавленного пользователя
+            db.get('SELECT id FROM users WHERE name = ?', [name], (err, row) => {
+              if (err) {
+                console.error(err);
+                res.status(500).send('Ошибка базы данных');
+              } else {
+                const userId = row.id;
+
+                // Вставляем данные в таблицу documents
+                db.run(
+                  `
+                    INSERT INTO documents (series, number, issue_date, person_id)
+                    VALUES (?, ?, ?, ?);
+                  `,
+                  [
+                    document.series,
+                    document.number,
+                    document.issueDate,
+                    userId,
+                  ],
+                  err => {
+                    if (err) {
+                      console.error(err);
+                      res.status(500).send('Ошибка базы данных');
+                    } else {
+                      // Вставляем данные в таблицу works
+                      db.run(
+                        `
+                          INSERT INTO works (firm_name, phone, address, person_id)
+                          VALUES (?, ?, ?, ?);
+                        `,
+                        [
+                          work.firmName,
+                          work.phone,
+                          work.address,
+                          userId,
+                        ],
+                        err => {
+                          if (err) {
+                            console.error(err);
+                            res.status(500).send('Ошибка базы данных');
+                          } else {
+                            const newUser = new User(
+                              userId,
+                              name,
+                              birthdate,
+                              phone,
+                              document,
+                              work,
+                              hashed_password,
+                              authKey,
+                            )
+                            res.send(newUser);
+                          }
+                        },
+                      );
+                    }
+                  },
+                );
+              }
+            });
           }
         },
       );
