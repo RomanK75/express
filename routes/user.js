@@ -25,79 +25,72 @@ router.post('/register', (req, res) => {
           INSERT INTO users (name, birthdate, phone, auth_key, hashed_password)
           VALUES (?, ?, ?, ?, ?);
         `,
-        [
-          name,
-          birthdate,
-          phone,
-          authKey,
-          hashed_password,
-        ],
+        [name, birthdate, phone, authKey, hashed_password],
         err => {
           if (err) {
             console.error(err);
             res.status(500).send('Ошибка базы данных');
           } else {
             // Получаем идентификатор только что добавленного пользователя
-            db.get('SELECT id FROM users WHERE name = ?', [name], (err, row) => {
-              if (err) {
-                console.error(err);
-                res.status(500).send('Ошибка базы данных');
-              } else {
-                const userId = row.id;
+            db.get(
+              'SELECT id FROM users WHERE name = ?',
+              [name],
+              (err, row) => {
+                if (err) {
+                  console.error(err);
+                  res.status(500).send('Ошибка базы данных');
+                } else {
+                  const userId = row.id;
 
-                // Вставляем данные в таблицу documents
-                db.run(
-                  `
+                  // Вставляем данные в таблицу documents
+                  db.run(
+                    `
                     INSERT INTO documents (series, number, issue_date, person_id)
                     VALUES (?, ?, ?, ?);
                   `,
-                  [
-                    document.series,
-                    document.number,
-                    document.issueDate,
-                    userId,
-                  ],
-                  err => {
-                    if (err) {
-                      console.error(err);
-                      res.status(500).send('Ошибка базы данных');
-                    } else {
-                      // Вставляем данные в таблицу works
-                      db.run(
-                        `
+                    [
+                      document.series,
+                      document.number,
+                      document.issueDate,
+                      userId,
+                    ],
+                    err => {
+                      if (err) {
+                        console.error(err);
+                        res.status(500).send('Ошибка базы данных');
+                      } else {
+                        // Вставляем данные в таблицу works
+                        db.run(
+                          `
                           INSERT INTO works (firm_name, phone, address, person_id)
                           VALUES (?, ?, ?, ?);
                         `,
-                        [
-                          work.firmName,
-                          work.phone,
-                          work.address,
-                          userId,
-                        ],
-                        err => {
-                          if (err) {
-                            console.error(err);
-                            res.status(500).send('Ошибка базы данных');
-                          } else {
-                            const newUser = new User(
-                              userId,
-                              name,
-                              birthdate,
-                              phone,
-                              document,
-                              work,
-                              hashed_password,
-                              authKey,
-                            )
-                            res.send(newUser);
-                          }
-                        },
-                      );
-                    }
-                  },
-                );
-              }
-            });
+                          [work.firmName, work.phone, work.address, userId],
+                          err => {
+                            if (err) {
+                              console.error(err);
+                              res.status(500).send('Ошибка базы данных');
+                            } else {
+                              const newUser = new User(
+                                userId,
+                                name,
+                                birthdate,
+                                phone,
+                                document,
+                                work,
+                                hashed_password,
+                                authKey,
+                              );
+                              res.send(newUser);
+                            }
+                          },
+                        );
+                      }
+                    },
+                  );
+                }
+              },
+            );
           }
         },
       );
