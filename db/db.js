@@ -21,7 +21,8 @@ db.serialize(() => {
       number TEXT NOT NULL,
       issue_date TEXT NOT NULL,
       person_id INTEGER NOT NULL,
-      FOREIGN KEY (person_id) REFERENCES users (id)
+      FOREIGN KEY (person_id) REFERENCES users (id),
+      UNIQUE (series, number)
     );
   `);
 

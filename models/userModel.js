@@ -1,3 +1,5 @@
+
+import Work from "./work.js";
 class User {
   constructor(
     id,
