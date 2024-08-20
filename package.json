@@ -5,11 +5,12 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "lint": "eslint .",
     "prettier": "prettier --write .",
     "format": "npm run prettier && npm run lint",
     "start:dev": "nodemon app.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "author": "",
   "license": "ISC",
@@ -18,7 +19,9 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "eslint": "^9.9.0",
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "babel-jest": "^29.7.0",
     "nodemon": "^3.1.4",
     "prettier": "^3.3.3"
   }
