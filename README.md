@@ -53,6 +53,7 @@
 ```json
 {
   "name": "Иван Иванов",
+  "password": "password123",
   "birthdate": "1990-01-01",
   "phone": "+7 999 123 45 67",
   "document": {

@@ -15,8 +15,9 @@ db.serialize(() => {
       work_firm_name TEXT NOT NULL,
       work_phone TEXT NOT NULL,
       work_address TEXT NOT NULL,
-      auth_key TEXT NOT NULL
-    );
+      auth_key TEXT NOT NULL,
+      hashed_password TEXT NOT NULL
+      )
   `);
 });
 
